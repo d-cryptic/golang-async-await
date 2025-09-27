@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 	"time"
 )
 
@@ -20,7 +21,23 @@ func Async[T any](f func() (T, error)) *Future[T] {
 	done := make(chan struct{})
 
 	go func() {
-		defer close(done)
+		defer func() {
+			if r := recover(); r != nil {
+				switch x := r.(type) {
+				case error:
+					err = fmt.Errorf(
+						"panic in worker: %w\n%s", x, debug.Stack(),
+					)
+
+				default:
+					err = fmt.Errorf(
+						"panic in worker: %v\n%s", x, debug.Stack(),
+					)
+				}
+			}
+			close(done)
+		}()
+
 		result, err = f()
 	}()
 
@@ -64,7 +81,7 @@ func main() {
 	val, err := fut.Await()
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		fmt.Printf("Awaited Error: %v\n", err)
 	} else {
 		fmt.Printf("Success: %s\n", val)
 	}

@@ -6,6 +6,8 @@ A lightweight implementation of async/await pattern in Go using generics and gor
 
 This project implements JavaScript-style async/await functionality in Go, allowing asynchronous operations to be handled with a cleaner, more sequential-looking syntax while maintaining Go's concurrent execution model.
 
+- Reference: [Video](https://www.youtube.com/watch?v=ERqRcBbBGGY)
+
 ## Core Components
 
 ### `Future[T]` Type

@@ -85,3 +85,28 @@ val, err := fut.Await()
 go run main.go
 ```
 
+## Sample Output
+
+```
+Doing other work while fetching data...
+=> Starting to fetch user data...
+Doing work...
+=> Finished fetching user data...
+User data: John Doe
+=> Starting risky work (still work)...
+Awaited Error: panic in worker: something went wrong
+goroutine 20 [running]:
+runtime/debug.Stack()
+	/opt/homebrew/Cellar/go/1.22.5/libexec/src/runtime/debug/stack.go:24 +0x64
+main.Async[...].func1.1()
+	/Users/admin/Developers/Tinkering/golang-async-await/main.go:34 +0x74
+panic({0x101007c80?, 0x10101ca98?})
+	/opt/homebrew/Cellar/go/1.22.5/libexec/src/runtime/panic.go:770 +0x124
+main.workerThatPanics()
+	/Users/admin/Developers/Tinkering/golang-async-await/main.go:62 +0x74
+main.Async[...].func1()
+	/Users/admin/Developers/Tinkering/golang-async-await/main.go:41 +0x78
+created by main.Async[...] in goroutine 1
+	/Users/admin/Developers/Tinkering/golang-async-await/main.go:23 +0xdc
+```
+

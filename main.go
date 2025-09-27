@@ -17,10 +17,18 @@ func Async[T any](f func() (T, error)) *Future[T] {
 	var result T
 	var err error
 
+	done := make(chan struct{})
+
+	go func() {
+		defer close(done)
+		result, err = f()
+	}()
+
 	return &Future[T]{
 		await: func() (T, error) {
+			<-done
 			return result, err
-		}
+		},
 	}
 }
 
@@ -28,7 +36,14 @@ func fetchUserData() (string, error) {
 	fmt.Println("=> Starting to fetch user data...")
 	time.Sleep(2 * time.Second)
 	fmt.Println("=> Finished fetching user data...")
-	return "User Data: John Doe", nil
+	return "John Doe", nil
+}
+
+func workerThatPanics() (string, error) {
+	fmt.Println("=> Starting risky work (still work)...")
+	time.Sleep(300 * time.Millisecond)
+	panic("something went wrong")
+	return "", nil
 }
 
 func main() {
@@ -40,8 +55,17 @@ func main() {
 
 	userData, err := futureUser.Await()
 	if err != nil {
-		fmt.Println("Error while getting user data: %v\n", err)
+		fmt.Printf("Error while getting user data: %v\n", err)
 	} else {
-		fmt.Println("User data: %s\n", userData)
+		fmt.Printf("User data: %s\n", userData)
+	}
+
+	fut := Async(workerThatPanics)
+	val, err := fut.Await()
+
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	} else {
+		fmt.Printf("Success: %s\n", val)
 	}
 }
